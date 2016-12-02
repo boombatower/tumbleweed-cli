@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+
+VERSION="development"
+URL="http://snapshot.tumbleweed.boombatower.com:13372"
+
+tumbleweed_status()
+{
+  echo -n "latest: "
+  tumbleweed_latest
+  echo -n "current: "
+  tumbleweed_version
+}
+
+tumbleweed_latest()
+{
+  curl "$URL/latest"
+}
+
+tumbleweed_version()
+{
+  cat /etc/os-release | grep -oP "VERSION_ID=\"\K(\d+)"
+}
+
+tumbleweed_list()
+{
+  curl "$URL/list"
+}
+
+tumbleweed_switch()
+{
+}
+
+tumbleweed_usage()
+{
+  cat <<_EOF_
+Usage: $0 [options] command
+
+Options:
+    --version         Print version string and exit
+-h, --help            Display this message and exit
+
+Commands:
+status
+latest
+version
+list
+switch                wut
+_EOF_
+}
+
+tumbleweed_handle()
+{
+  case "$1" in
+    --version) echo "$VERSION"; exit 0; ;;
+    -h|--help) tumbleweed_usage ; exit 0 ;;
+    status) tumbleweed_status ; return ;;
+    latest) tumbleweed_latest ; return ;;
+    version) tumbleweed_version ; return ;;
+    list) tumbleweed_list ; return ;;
+    switch) tumbleweed_switch ; return ;;
+    -*) echo "unknown option $1" ; exit 1 ;;
+    *) return 1 ;;
+  esac
+  return 0
+}
+
+while tumbleweed_handle $1 ; do
+  shift
+done
