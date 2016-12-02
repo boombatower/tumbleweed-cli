@@ -7,8 +7,8 @@ REPOS_DIR="/etc/zypp/repos.d"
 
 tumbleweed_status()
 {
-  echo "latest : $(tumbleweed_latest)"
-  echo "current: $(tumbleweed_version)"
+  echo "latest   : $(tumbleweed_latest)"
+  echo "installed: $(tumbleweed_version)"
 }
 
 tumbleweed_latest()
