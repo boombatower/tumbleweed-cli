@@ -31,7 +31,7 @@ tumbleweed_switch()
 tumbleweed_usage()
 {
   cat <<_EOF_
-Usage: $0 [options] command
+Usage: $0 [options] command [arguments]
 
 Options:
     --version         Print version string and exit
@@ -49,19 +49,30 @@ _EOF_
 tumbleweed_handle()
 {
   case "$1" in
-    --version) echo "$VERSION"; exit 0; ;;
-    -h|--help) tumbleweed_usage ; exit 0 ;;
-    status) tumbleweed_status ; return ;;
-    latest) tumbleweed_latest ; return ;;
-    version) tumbleweed_version ; return ;;
-    list) tumbleweed_list ; return ;;
-    switch) tumbleweed_switch ; return ;;
-    -*) echo "unknown option $1" ; exit 1 ;;
-    *) return 1 ;;
+    --version) echo "$VERSION" ; exit 0 ; ;;
+    -h|--help) command="usage" ; ;;
+    status|latest|version|list)
+      command="$1" ; ;;
+    switch)
+      command="$1" ; args_expected=1 ;
+      ;;
+    -*) echo "unknown option $1" ; exit 1 ; ;;
+    *)
+      if [ $args_expected -eq 0 ] ; then
+        return 1
+      fi
+      args+=("$1")
+      ((args_expected--))
+      ;;
   esac
   return 0
 }
 
+command="usage"
+args_expected=0
+args=()
 while tumbleweed_handle $1 ; do
   shift
 done
+
+tumbleweed_$command ${args[@]}
