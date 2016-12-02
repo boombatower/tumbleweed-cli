@@ -137,13 +137,13 @@ Options:
 -h, --help            Display this message and exit
 
 Commands:
-status
-latest
-version
-list
-switch                wut
-revert
-list-repos
+status                Show status information (latest and current snapshots).
+latest                Show latest snapshot available.
+version               Show current installed snapshot.
+list                  List available snapshots.
+switch                Switch to a new snapshot.
+revert                Revert to the previous snapshot or repo state.
+list-repos            List snapshottable repo URLs for the current snapshot.
 _EOF_
 }
 
