@@ -26,6 +26,12 @@ tumbleweed_list()
   curl --silent "$URL/list"
 }
 
+tumbleweed_update()
+{
+  tumbleweed_switch
+  install=1
+}
+
 tumbleweed_switch()
 {
   if [ $# -eq 1 ] ; then
@@ -126,6 +132,12 @@ tumbleweed_list-repos()
   done
 }
 
+tumbleweed_install()
+{
+  sudo zypper ref
+  sudo zypper dup
+}
+
 tumbleweed_usage()
 {
   cat <<_EOF_
@@ -134,6 +146,7 @@ Usage: $0 [options] command [arguments]
 Options:
     --version         Print version string and exit
     --force           Force on operation to occur regardless of checks.
+    --install         Initiate install after command.
 -h, --help            Display this message and exit
 
 Commands:
@@ -141,7 +154,8 @@ status                Show status information (latest and current snapshots).
 latest                Show latest snapshot available.
 version               Show current installed snapshot.
 list                  List available snapshots.
-switch                Switch to a new snapshot.
+update|upgrade        Switch to and install the latest available snapshot.
+switch [version]      Switch to a new snapshot (none for latest).
 revert                Revert to the previous snapshot or repo state.
 list-repos            List snapshottable repo URLs for the current snapshot.
 _EOF_
@@ -152,9 +166,12 @@ tumbleweed_handle()
   case "$1" in
     --version) echo "$VERSION" ; exit 0 ; ;;
     --force) force=1 ; ;;
+    --install) install=1 ; ;;
     -h|--help) command="usage" ; ;;
     status|latest|version|list|revert)
       command="$1" ; ;;
+    update|upgrade)
+      command="update" ; ;;
     switch)
       command="$1" ; args_expected=1 ;
       ;;
@@ -182,3 +199,7 @@ while tumbleweed_handle $1 ; do
 done
 
 tumbleweed_$command ${args[@]}
+
+if [ "$install" == "1" ] ; then
+  tumbleweed_install
+fi
