@@ -2,6 +2,8 @@
 
 VERSION="development"
 URL="http://snapshot.tumbleweed.boombatower.com:13372"
+URL_REPLACE="http://download.opensuse.org"
+REPOS_DIR="/etc/zypp/repos.d"
 
 tumbleweed_status()
 {
@@ -26,6 +28,103 @@ tumbleweed_list()
 
 tumbleweed_switch()
 {
+  if [ $# -eq 1 ] ; then
+    local version="$1"
+  else
+    local version="$(tumbleweed_latest)"
+    echo "choosing latest version"
+  fi
+
+  # TODO Allow switching from non-snapshottable to snapshotted on same version.
+  if [ "$version" == "$(tumbleweed_version)" ] ; then
+    echo "already on $version"
+    exit
+  fi
+
+  echo "switching from $(tumbleweed_version) to $version"
+  tumbleweed_list-repos "$version" > /dev/null
+  if [ ${#repo_alias[@]} -eq 0 ] ; then
+    echo "no snapshottable repos found"
+    exit 1
+  fi
+
+  # Prompt for confirmation.
+  echo -n "switch ${#repo_alias[@]} repos (${repo_alias[@]})? [y/n] (y): "
+  read response
+  if [ "$response" != "" ] && [ "$response" != "y" ] ; then
+    echo "exiting"
+    exit 1
+  fi
+
+  # Obtain sudo before issuing real commands to avoid half completion.
+  if ! sudo cat /dev/null ; then
+    echo "unable to obtain sudo"
+    exit 1
+  fi
+
+  if [ ! -d "$REPOS_DIR/.previous" ] ; then
+    sudo mkdir "$REPOS_DIR/.previous"
+  fi
+
+  local i=0
+  while [ $i -lt ${#repo_alias[@]} ] ; do
+    local files=($(grep -l "\[${repo_alias[$i]}\]" "$REPOS_DIR"/*))
+    if [ ${#files[@]} -eq 1 ] ; then
+      local file="${files[0]}"
+      sudo cp "$file" "$REPOS_DIR/.previous/$(basename "$file")"
+      sudo sed -i "s|baseurl=.*|baseurl=${repo_url[$i]}|" "$file"
+      echo "switched ${repo_alias[$i]}"
+    else
+      echo "failed to switched ${repo_alias[$i]}"
+    fi
+    ((i++))
+  done
+}
+
+tumbleweed_revert()
+{
+  if [ ! -d "$REPOS_DIR/.previous" ] ; then
+    echo "nothing to revert"
+    exit 1
+  fi
+
+  # Prompt for confirmation.
+  local repos=($(ls "$REPOS_DIR/.previous"))
+  echo -n "revert ${#repos[@]} repos? [y/n] (y): "
+  read response
+  if [ "$response" != "" ] && [ "$response" != "y" ] ; then
+    echo "exiting"
+    exit 1
+  fi
+
+  sudo mv "$REPOS_DIR/.previous"/* $REPOS_DIR/
+  sudo rm -r "$REPOS_DIR/.previous"
+}
+
+tumbleweed_list-repos()
+{
+  local current="$(tumbleweed_version)"
+  local replace="$1"
+  local IFS=$'|\n'
+  # Include disabled repos since they may be enabled outside of this tool.
+  local parts=($(zypper lr -U | grep -P "(?:http://download.opensuse.org/(?:[^u][^/]+/)?tumbleweed|$URL)"))
+  local i=0
+  repo_alias=()
+  repo_url=()
+  while [ $i -lt ${#parts[@]} ] ; do
+    local alias="${parts[$i+1]//[[:blank:]]/}"
+    local url="${parts[$i+6]//[[:blank:]]/}"
+
+    # Replace either current snapshot or non-snapshotted URL.
+    url="${url/$current/$replace}"
+    url="${url/$URL_REPLACE/$URL\/$replace}"
+
+    repo_alias+=($alias)
+    repo_url+=($url)
+
+    echo "$url ($alias)"
+    ((i+=7))
+  done
 }
 
 tumbleweed_usage()
@@ -43,6 +142,8 @@ latest
 version
 list
 switch                wut
+revert
+list-repos
 _EOF_
 }
 
@@ -51,10 +152,14 @@ tumbleweed_handle()
   case "$1" in
     --version) echo "$VERSION" ; exit 0 ; ;;
     -h|--help) command="usage" ; ;;
-    status|latest|version|list)
+    status|latest|version|list|revert)
       command="$1" ; ;;
     switch)
       command="$1" ; args_expected=1 ;
+      ;;
+    list-repos)
+      command="$1"
+      args=("$(tumbleweed_version)")
       ;;
     -*) echo "unknown option $1" ; exit 1 ; ;;
     *)
