@@ -35,8 +35,7 @@ tumbleweed_switch()
     echo "choosing latest version"
   fi
 
-  # TODO Allow switching from non-snapshottable to snapshotted on same version.
-  if [ "$version" == "$(tumbleweed_version)" ] ; then
+  if [ "$version" == "$(tumbleweed_version)" ] && [ "$force" != "1" ] ; then
     echo "already on $version"
     exit
   fi
@@ -134,6 +133,7 @@ Usage: $0 [options] command [arguments]
 
 Options:
     --version         Print version string and exit
+    --force           Force on operation to occur regardless of checks.
 -h, --help            Display this message and exit
 
 Commands:
@@ -151,6 +151,7 @@ tumbleweed_handle()
 {
   case "$1" in
     --version) echo "$VERSION" ; exit 0 ; ;;
+    --force) force=1 ; ;;
     -h|--help) command="usage" ; ;;
     status|latest|version|list|revert)
       command="$1" ; ;;
