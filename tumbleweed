@@ -5,15 +5,13 @@ URL="http://snapshot.tumbleweed.boombatower.com:13372"
 
 tumbleweed_status()
 {
-  echo -n "latest: "
-  tumbleweed_latest
-  echo -n "current: "
-  tumbleweed_version
+  echo "latest : $(tumbleweed_latest)"
+  echo "current: $(tumbleweed_version)"
 }
 
 tumbleweed_latest()
 {
-  curl "$URL/latest"
+  curl --silent "$URL/latest"
 }
 
 tumbleweed_version()
@@ -23,7 +21,7 @@ tumbleweed_version()
 
 tumbleweed_list()
 {
-  curl "$URL/list"
+  curl --silent "$URL/list"
 }
 
 tumbleweed_switch()
