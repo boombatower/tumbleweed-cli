@@ -247,11 +247,11 @@ tumbleweed_handle()
     --force) force=1 ; ;;
     --install) install=1 ; ;;
     -h|--help) command="usage" ; ;;
-    init|installed|status|target|latest|list|revert|uninit)
+    init|installed|status|target|latest|list|revert|uninit|update)
       command="$1" ; ;;
     version)
       command="installed" ; ;;
-    update|upgrade)
+    upgrade)
       command="update" ; ;;
     switch)
       command="$1" ; args_expected=1 ;
