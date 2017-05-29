@@ -134,6 +134,17 @@ tumbleweed_update()
   install=1
 }
 
+tumbleweed_prompt()
+{
+  echo -n "$1 [y/n] (y): "
+  local response
+  read response
+  if [ "$response" != "" ] && [ "$response" != "y" ] ; then
+    echo "exiting"
+    exit 1
+  fi
+}
+
 tumbleweed_switch()
 {
   if [ $# -eq 1 ] ; then
