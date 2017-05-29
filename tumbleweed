@@ -104,7 +104,7 @@ tumbleweed_history_pop()
 tumbleweed_status()
 {
   echo "latest   : $(tumbleweed_latest)"
-  echo "installed: $(tumbleweed_version)"
+  echo "installed: $(tumbleweed_installed)"
 }
 
 tumbleweed_latest()
@@ -112,7 +112,7 @@ tumbleweed_latest()
   curl --silent "$URL/latest"
 }
 
-tumbleweed_version()
+tumbleweed_installed()
 {
   cat /etc/os-release | grep -oP "VERSION_ID=\"\K(\d+)"
 }
@@ -137,7 +137,7 @@ tumbleweed_switch()
     echo "choosing latest version"
   fi
 
-  if [ "$version" == "$(tumbleweed_version)" ] && [ "$force" != "1" ] ; then
+  if [ "$version" == "$(tumbleweed_target)" ] && [ "$force" != "1" ] ; then
     echo "already on $version"
     exit
   fi
@@ -224,7 +224,7 @@ Commands:
 init                  Initialize repos to point to snapshot repos.
 status                Show status information (latest and current snapshots).
 latest                Show latest snapshot available.
-version               Show current installed snapshot.
+installed|version     Show current installed snapshot.
 list                  List available snapshots.
 update|upgrade        Switch to and install the latest available snapshot.
 switch [version]      Switch to a new snapshot (none for latest).
@@ -240,8 +240,10 @@ tumbleweed_handle()
     --force) force=1 ; ;;
     --install) install=1 ; ;;
     -h|--help) command="usage" ; ;;
-    init|status|latest|version|list|revert|uninit)
+    init|installed|status|latest|list|revert|uninit)
       command="$1" ; ;;
+    version)
+      command="installed" ; ;;
     update|upgrade)
       command="update" ; ;;
     switch)
