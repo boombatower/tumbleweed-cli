@@ -2,7 +2,6 @@
 
 VERSION="development"
 URL="http://download.opensuse.org/tumbleweed"
-URL_REPLACE="http://download.opensuse.org"
 CONFIG_DIR="/etc/zypp"
 CONFIG_FILE="$CONFIG_DIR/zypp.conf"
 CONFIG_FILE_VARIABLE="snapshotVersion"
@@ -204,32 +203,6 @@ tumbleweed_uninit()
   sudo rm -r "$REPOS_DIR/.previous"
 }
 
-tumbleweed_list-repos()
-{
-  local current="$(tumbleweed_version)"
-  local replace="$1"
-  local IFS=$'|\n'
-  # Include disabled repos since they may be enabled outside of this tool.
-  local parts=($(zypper lr -U | grep -P "(?:http://download.opensuse.org/(?:[^u][^/]+/)?tumbleweed|$URL)"))
-  local i=0
-  repo_alias=()
-  repo_url=()
-  while [ $i -lt ${#parts[@]} ] ; do
-    local alias="${parts[$i+1]//[[:blank:]]/}"
-    local url="${parts[$i+6]//[[:blank:]]/}"
-
-    # Replace either current snapshot or non-snapshotted URL.
-    url="${url/$current/$replace}"
-    url="${url/$URL_REPLACE/$URL\/$replace}"
-
-    repo_alias+=($alias)
-    repo_url+=($url)
-
-    echo "$url ($alias)"
-    ((i+=7))
-  done
-}
-
 tumbleweed_install()
 {
   sudo zypper ref
@@ -257,7 +230,6 @@ update|upgrade        Switch to and install the latest available snapshot.
 switch [version]      Switch to a new snapshot (none for latest).
 revert                Revert to the previous snapshot or repo state.
 uninit                Revert back to a snapshotless repository setup.
-list-repos            List snapshottable repo URLs for the current snapshot.
 _EOF_
 }
 
@@ -274,10 +246,6 @@ tumbleweed_handle()
       command="update" ; ;;
     switch)
       command="$1" ; args_expected=1 ;
-      ;;
-    list-repos)
-      command="$1"
-      args=("$(tumbleweed_version)")
       ;;
     -*) echo "unknown option $1" ; exit 1 ; ;;
     *)
