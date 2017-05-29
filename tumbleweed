@@ -244,6 +244,7 @@ latest                Show latest snapshot available.
 installed|version     Show current installed snapshot.
 target                Show the target of the repositories.
 list                  List available snapshots.
+history               List history of snapshots targetted.
 update|upgrade        Switch to and install the latest available snapshot.
 switch [version]      Switch to a new snapshot (none for latest).
 revert                Revert to the previous snapshot or repo state.
@@ -258,7 +259,7 @@ tumbleweed_handle()
     --force) force=1 ; ;;
     --install) install=1 ; ;;
     -h|--help) command="usage" ; ;;
-    init|installed|status|target|latest|list|revert|uninit|update)
+    history|init|installed|status|target|latest|list|revert|uninit|update)
       command="$1" ; ;;
     version)
       command="installed" ; ;;
