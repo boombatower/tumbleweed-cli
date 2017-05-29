@@ -5,6 +5,15 @@ URL="http://snapshot.tumbleweed.boombatower.com:13372"
 URL_REPLACE="http://download.opensuse.org"
 REPOS_DIR="/etc/zypp/repos.d"
 
+tumbleweed_sudo()
+{
+  # Obtain sudo before issuing real commands to avoid half completion.
+  if ! sudo cat /dev/null ; then
+    echo "unable to obtain sudo"
+    exit 1
+  fi
+}
+
 tumbleweed_status()
 {
   echo "latest   : $(tumbleweed_latest)"
@@ -102,6 +111,7 @@ tumbleweed_revert()
     exit 1
   fi
 
+  tumbleweed_sudo
   sudo mv "$REPOS_DIR/.previous"/* $REPOS_DIR/
   sudo rm -r "$REPOS_DIR/.previous"
 }
