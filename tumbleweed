@@ -159,44 +159,23 @@ tumbleweed_switch()
     exit
   fi
 
-  echo "switching from $(tumbleweed_version) to $version"
-  tumbleweed_list-repos "$version" > /dev/null
-  if [ ${#repo_alias[@]} -eq 0 ] ; then
-    echo "no snapshottable repos found"
+  tumbleweed_prompt "switching from $(tumbleweed_target) to $version?"
+  tumbleweed_sudo
+  tumbleweed_config "$version"
+}
+
+tumbleweed_revert()
+{
+  local version="$(tumbleweed_history_pop)"
+  if [ "$version" == "" ] ; then
+    echo "no previous version in history"
     exit 1
   fi
 
-  # Prompt for confirmation.
-  echo -n "switch ${#repo_alias[@]} repos (${repo_alias[@]})? [y/n] (y): "
-  read response
-  if [ "$response" != "" ] && [ "$response" != "y" ] ; then
-    echo "exiting"
-    exit 1
-  fi
-
-  # Obtain sudo before issuing real commands to avoid half completion.
-  if ! sudo cat /dev/null ; then
-    echo "unable to obtain sudo"
-    exit 1
-  fi
-
-  if [ ! -d "$REPOS_DIR/.previous" ] ; then
-    sudo mkdir "$REPOS_DIR/.previous"
-  fi
-
-  local i=0
-  while [ $i -lt ${#repo_alias[@]} ] ; do
-    local files=($(grep -l "\[${repo_alias[$i]}\]" "$REPOS_DIR"/*))
-    if [ ${#files[@]} -eq 1 ] ; then
-      local file="${files[0]}"
-      sudo cp "$file" "$REPOS_DIR/.previous/$(basename "$file")"
-      sudo sed -i "s|baseurl=.*|baseurl=${repo_url[$i]}|" "$file"
-      echo "switched ${repo_alias[$i]}"
-    else
-      echo "failed to switched ${repo_alias[$i]}"
-    fi
-    ((i++))
-  done
+  tumbleweed_prompt "switching from $(tumbleweed_target) to $version?"
+  tumbleweed_sudo
+  tumbleweed_history_pop "indeed"
+  tumbleweed_config "$version"
 }
 
 tumbleweed_uninit()
