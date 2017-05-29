@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 VERSION="development"
-URL="http://snapshot.tumbleweed.boombatower.com:13372"
+URL="http://download.opensuse.org/tumbleweed"
 URL_REPLACE="http://download.opensuse.org"
 CONFIG_DIR="/etc/zypp"
 CONFIG_FILE="$CONFIG_DIR/zypp.conf"
