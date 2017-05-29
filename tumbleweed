@@ -104,12 +104,18 @@ tumbleweed_history_pop()
 tumbleweed_status()
 {
   echo "latest   : $(tumbleweed_latest)"
+  echo "target   : $(tumbleweed_config)"
   echo "installed: $(tumbleweed_installed)"
 }
 
 tumbleweed_latest()
 {
   curl --silent "$URL/latest"
+}
+
+tumbleweed_target()
+{
+  tumbleweed_config
 }
 
 tumbleweed_installed()
@@ -225,6 +231,7 @@ init                  Initialize repos to point to snapshot repos.
 status                Show status information (latest and current snapshots).
 latest                Show latest snapshot available.
 installed|version     Show current installed snapshot.
+target                Show the target of the repositories.
 list                  List available snapshots.
 update|upgrade        Switch to and install the latest available snapshot.
 switch [version]      Switch to a new snapshot (none for latest).
@@ -240,7 +247,7 @@ tumbleweed_handle()
     --force) force=1 ; ;;
     --install) install=1 ; ;;
     -h|--help) command="usage" ; ;;
-    init|installed|status|latest|list|revert|uninit)
+    init|installed|status|target|latest|list|revert|uninit)
       command="$1" ; ;;
     version)
       command="installed" ; ;;
