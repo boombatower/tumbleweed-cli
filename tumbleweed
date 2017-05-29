@@ -3,7 +3,13 @@
 VERSION="development"
 URL="http://snapshot.tumbleweed.boombatower.com:13372"
 URL_REPLACE="http://download.opensuse.org"
+CONFIG_DIR="/etc/zypp"
+CONFIG_FILE="$CONFIG_DIR/zypp.conf"
+CONFIG_FILE_VARIABLE="snapshotVersion"
+CONFIG_FILE_VARIABLE_PATTERN='^\s*'$CONFIG_FILE_VARIABLE'\s+=\s+'
+SNAPSHOT_HISTORY="$CONFIG_DIR/.snapshot_version.history"
 REPOS_DIR="/etc/zypp/repos.d"
+REPO_PATTERN="http://download.opensuse.org/(?:[^u][^/]+/)?tumbleweed/[^$]+"
 
 tumbleweed_sudo()
 {
@@ -11,6 +17,88 @@ tumbleweed_sudo()
   if ! sudo cat /dev/null ; then
     echo "unable to obtain sudo"
     exit 1
+  fi
+}
+
+tumbleweed_inited()
+{
+  if grep -R '$snapshot_version' "$REPOS_DIR" > /dev/null ; then
+    return 0
+  fi
+  return 1
+}
+
+tumbleweed_init()
+{
+  tumbleweed_sudo
+  tumbleweed_config "$(tumbleweed_installed)"
+  tumbleweed_history_init
+  tumbleweed_repo_init
+}
+
+tumbleweed_config()
+{
+  if [ $# -eq 1 ] ; then
+    local version="$1"
+    local replacement="$CONFIG_FILE_VARIABLE = $version"
+    if [ ! "$(tumbleweed_config)" ] ; then
+      sudo sed -i 's/^\[main\]/[main]\n\n'"$replacement"'/' "$CONFIG_FILE" | head -n 10
+    else
+      sudo sed -i -E 's/'$CONFIG_FILE_VARIABLE_PATTERN'.*/'"$replacement"'/' "$CONFIG_FILE" | head -n 10
+    fi
+
+    if [ $? -ne 0 ] ; then
+      echo "failed to set $CONFIG_FILE_VARIABLE in $CONFIG_FILE"
+      exit 1
+    fi
+    tumbleweed_history "$version"
+  else
+    grep -oP "$CONFIG_FILE_VARIABLE_PATTERN\K.*" "$CONFIG_FILE"
+  fi
+}
+
+tumbleweed_repo_init()
+{
+  if [ ! -d "$REPOS_DIR/.previous" ] ; then
+    sudo mkdir "$REPOS_DIR/.previous"
+  fi
+
+  local files=($(grep -lP "$REPO_PATTERN" "$REPOS_DIR"/*))
+  local file
+  for file in ${files[@]} ; do
+    echo "backup $file"
+    sudo cp --backup=numbered "$file" "$REPOS_DIR/.previous/$(basename "$file")"
+    sudo sed -i -r 's|(name=.*)|\1 ($snapshot_version)|' "$file"
+    sudo sed -i -r 's|(baseurl=.*tumbleweed/)(.*)|\1$snapshot_version/\2|' "$file"
+  done
+}
+
+tumbleweed_history_init()
+{
+  if [ ! -f "$SNAPSHOT_HISTORY" ] ; then
+    # Need an actual line for sed insert to work.
+    echo | sudo tee "$SNAPSHOT_HISTORY" > /dev/null
+  fi
+}
+
+tumbleweed_history()
+{
+  if [ $# -eq 1 ] ; then
+    if [ "$(head -n1 "$SNAPSHOT_HISTORY")" != "$1" ] ; then
+      sudo sed -i "1i$1" "$SNAPSHOT_HISTORY"
+    fi
+  else
+    # Exclude empty lines necessary for data structure.
+    grep -v -e '^$' "$SNAPSHOT_HISTORY"
+  fi
+}
+
+tumbleweed_history_pop()
+{
+  if [ $# -eq 1 ] ; then
+    sudo sed -i "1d" "$SNAPSHOT_HISTORY"
+  else
+    head -n2 "$SNAPSHOT_HISTORY" | tail -n1
   fi
 }
 
@@ -160,6 +248,7 @@ Options:
 -h, --help            Display this message and exit
 
 Commands:
+init                  Initialize repos to point to snapshot repos.
 status                Show status information (latest and current snapshots).
 latest                Show latest snapshot available.
 version               Show current installed snapshot.
@@ -178,7 +267,7 @@ tumbleweed_handle()
     --force) force=1 ; ;;
     --install) install=1 ; ;;
     -h|--help) command="usage" ; ;;
-    status|latest|version|list|revert)
+    init|status|latest|version|list|revert)
       command="$1" ; ;;
     update|upgrade)
       command="update" ; ;;
@@ -207,6 +296,12 @@ args=()
 while tumbleweed_handle $1 ; do
   shift
 done
+
+if [ "$command" != "usage" ] && [ "$command" != "init" ] && ! tumbleweed_inited ; then
+  echo "repositories have not been initialized for snapshots"
+  echo "  Try $0 init"
+  exit 1
+fi
 
 tumbleweed_$command ${args[@]}
 
