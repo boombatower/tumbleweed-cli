@@ -183,7 +183,7 @@ tumbleweed_switch()
   done
 }
 
-tumbleweed_revert()
+tumbleweed_uninit()
 {
   if [ ! -d "$REPOS_DIR/.previous" ] ; then
     echo "nothing to revert"
@@ -256,6 +256,7 @@ list                  List available snapshots.
 update|upgrade        Switch to and install the latest available snapshot.
 switch [version]      Switch to a new snapshot (none for latest).
 revert                Revert to the previous snapshot or repo state.
+uninit                Revert back to a snapshotless repository setup.
 list-repos            List snapshottable repo URLs for the current snapshot.
 _EOF_
 }
@@ -267,7 +268,7 @@ tumbleweed_handle()
     --force) force=1 ; ;;
     --install) install=1 ; ;;
     -h|--help) command="usage" ; ;;
-    init|status|latest|version|list|revert)
+    init|status|latest|version|list|revert|uninit)
       command="$1" ; ;;
     update|upgrade)
       command="update" ; ;;
