@@ -218,7 +218,7 @@ Options:
 
 Commands:
 init                  Initialize repos to point to snapshot repos.
-status                Show status information (latest and current snapshots).
+status                Show status information (latest, target, and installed).
 latest                Show latest snapshot available.
 installed|version     Show current installed snapshot.
 target                Show the target of the repositories.
