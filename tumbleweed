@@ -29,6 +29,11 @@ tumbleweed_inited()
 
 tumbleweed_init()
 {
+  if tumbleweed_inited && [ "$force" != "1" ] ; then
+    echo "already initialized"
+    return
+  fi
+
   tumbleweed_sudo
   tumbleweed_history_init
   tumbleweed_config "$(tumbleweed_installed)"
