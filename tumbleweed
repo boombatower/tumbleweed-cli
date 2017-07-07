@@ -196,6 +196,7 @@ tumbleweed_uninit()
   tumbleweed_sudo
   sudo mv "$REPOS_DIR/.previous"/* $REPOS_DIR/
   sudo rm -r "$REPOS_DIR/.previous"
+  sudo rm "$VAR_FILE"
 }
 
 tumbleweed_install()
