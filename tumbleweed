@@ -148,6 +148,10 @@ tumbleweed_switch()
 {
   if [ $# -eq 1 ] ; then
     local version="$1"
+    if ! tumbleweed_list | grep -Fx "$version" > /dev/null ; then
+      echo "invalid version $version, not in available list"
+      return
+    fi
   else
     local version="$(tumbleweed_latest)"
     echo "choosing latest version"
