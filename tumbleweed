@@ -6,7 +6,7 @@ CONFIG_DIR="/etc/zypp"
 VARS_DIR="$CONFIG_DIR/vars.d"
 VAR_NAME="snapshotVersion"
 VAR_FILE="$VARS_DIR/$VAR_NAME"
-SNAPSHOT_HISTORY="$CONFIG_DIR/.snapshot_version.history"
+SNAPSHOT_HISTORY="$VARS_DIR/.snapshotVersion.history"
 REPOS_DIR="/etc/zypp/repos.d"
 REPO_PATTERN="http://download.opensuse.org/(?:[^u][^/]+/)?tumbleweed/[^$]+"
 
