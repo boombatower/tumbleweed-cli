@@ -36,11 +36,11 @@ tumbleweed_init()
 
   tumbleweed_sudo
   tumbleweed_history_init
-  tumbleweed_config "$(tumbleweed_installed)"
+  tumbleweed_variable "$(tumbleweed_installed)"
   tumbleweed_repo_init
 }
 
-tumbleweed_config()
+tumbleweed_variable()
 {
   if [ $# -eq 1 ] ; then
     local version="$1"
@@ -114,7 +114,7 @@ tumbleweed_latest()
 
 tumbleweed_target()
 {
-  tumbleweed_config
+  tumbleweed_variable
 }
 
 tumbleweed_installed()
@@ -160,7 +160,7 @@ tumbleweed_switch()
 
   tumbleweed_prompt "switching from $(tumbleweed_target) to $version?"
   tumbleweed_sudo
-  tumbleweed_config "$version"
+  tumbleweed_variable "$version"
 }
 
 tumbleweed_revert()
@@ -174,7 +174,7 @@ tumbleweed_revert()
   tumbleweed_prompt "switching from $(tumbleweed_target) to $version?"
   tumbleweed_sudo
   tumbleweed_history_pop "indeed"
-  tumbleweed_config "$version"
+  tumbleweed_variable "$version"
 }
 
 tumbleweed_uninit()
