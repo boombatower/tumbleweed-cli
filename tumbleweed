@@ -109,7 +109,7 @@ tumbleweed_history_pop()
 tumbleweed_status()
 {
   echo "latest   : $(tumbleweed_latest)"
-  echo "target   : $(tumbleweed_config)"
+  echo "target   : $(tumbleweed_target)"
   echo "installed: $(tumbleweed_installed)"
 }
 
