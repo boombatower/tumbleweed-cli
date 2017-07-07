@@ -30,8 +30,8 @@ tumbleweed_inited()
 tumbleweed_init()
 {
   tumbleweed_sudo
-  tumbleweed_config "$(tumbleweed_installed)"
   tumbleweed_history_init
+  tumbleweed_config "$(tumbleweed_installed)"
   tumbleweed_repo_init
 }
 
