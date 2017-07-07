@@ -3,9 +3,9 @@
 VERSION="development"
 URL="http://download.opensuse.org/tumbleweed"
 CONFIG_DIR="/etc/zypp"
-CONFIG_FILE="$CONFIG_DIR/zypp.conf"
-CONFIG_FILE_VARIABLE="snapshotVersion"
-CONFIG_FILE_VARIABLE_PATTERN='^\s*'$CONFIG_FILE_VARIABLE'\s+=\s+'
+VARS_DIR="$CONFIG_DIR/vars.d"
+VAR_NAME="snapshotVersion"
+VAR_FILE="$VARS_DIR/$VAR_NAME"
 SNAPSHOT_HISTORY="$CONFIG_DIR/.snapshot_version.history"
 REPOS_DIR="/etc/zypp/repos.d"
 REPO_PATTERN="http://download.opensuse.org/(?:[^u][^/]+/)?tumbleweed/[^$]+"
@@ -21,7 +21,7 @@ tumbleweed_sudo()
 
 tumbleweed_inited()
 {
-  if grep -R '$snapshot_version' "$REPOS_DIR" > /dev/null ; then
+  if [ -f "$VAR_FILE" ] ; then
     return 0
   fi
   return 1
@@ -44,20 +44,14 @@ tumbleweed_config()
 {
   if [ $# -eq 1 ] ; then
     local version="$1"
-    local replacement="$CONFIG_FILE_VARIABLE = $version"
-    if [ ! "$(tumbleweed_config)" ] ; then
-      sudo sed -i 's/^\[main\]/[main]\n\n'"$replacement"'/' "$CONFIG_FILE" | head -n 10
-    else
-      sudo sed -i -E 's/'$CONFIG_FILE_VARIABLE_PATTERN'.*/'"$replacement"'/' "$CONFIG_FILE" | head -n 10
-    fi
-
+    echo "$version" | sudo tee "$VAR_FILE" > /dev/null
     if [ $? -ne 0 ] ; then
-      echo "failed to set $CONFIG_FILE_VARIABLE in $CONFIG_FILE"
+      echo "failed to set version to $version in $VARS_DIR/$VAR_NAME"
       exit 1
     fi
     tumbleweed_history "$version"
   else
-    grep -oP "$CONFIG_FILE_VARIABLE_PATTERN\K.*" "$CONFIG_FILE"
+    cat "$VAR_FILE"
   fi
 }
 
@@ -72,8 +66,8 @@ tumbleweed_repo_init()
   for file in ${files[@]} ; do
     echo "backup $file"
     sudo cp --backup=numbered "$file" "$REPOS_DIR/.previous/$(basename "$file")"
-    sudo sed -i -r 's|(name=.*)|\1 ($snapshot_version)|' "$file"
-    sudo sed -i -r 's|(baseurl=.*tumbleweed/)(.*)|\1$snapshot_version/\2|' "$file"
+    sudo sed -i -r 's|(name=.*)|\1 ($snapshotVersion)|' "$file"
+    sudo sed -i -r 's|(baseurl=.*tumbleweed/)(.*)|\1$snapshotVersion/\2|' "$file"
   done
 }
 
