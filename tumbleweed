@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 
 VERSION="development"
-URL="http://download.opensuse.org/tumbleweed"
+URL="http://download.tumbleweed.boombatower.com"
 CONFIG_DIR="/etc/zypp"
 VARS_DIR="$CONFIG_DIR/vars.d"
 VAR_NAME="snapshotVersion"
 VAR_FILE="$VARS_DIR/$VAR_NAME"
 SNAPSHOT_HISTORY="$VARS_DIR/.snapshotVersion.history"
 REPOS_DIR="/etc/zypp/repos.d"
-REPO_PATTERN="http://download.opensuse.org/(?:[^u][^/]+/)?tumbleweed/[^$]+"
+# REPO_PATTERN="http://download.opensuse.org/(?:[^u][^/]+/)?tumbleweed/[^$]+"
+# Disable matching debug and source URLs for the time being.
+REPO_PATTERN="http://download.opensuse.org/tumbleweed/[^$]+"
 
 tumbleweed_sudo()
 {
@@ -67,7 +69,7 @@ tumbleweed_repo_init()
     echo "backup $file"
     sudo cp --backup=numbered "$file" "$REPOS_DIR/.previous/$(basename "$file")"
     sudo sed -i -r 's|(name=.*)|\1 ($snapshotVersion)|' "$file"
-    sudo sed -i -r 's|(baseurl=.*tumbleweed/)(.*)|\1$snapshotVersion/\2|' "$file"
+    sudo sed -i -r 's|(baseurl=).*tumbleweed/(.*)|\1'$URL'/$snapshotVersion/\2|' "$file"
   done
 }
 
