@@ -4,8 +4,9 @@ Command line interface for interacting with Tumbleweed snapshots.
 
 ## Installation
 
+The latest stable version can be installed from the main OSS repository.
+
 ```bash
-zypper addrepo -p 105 http://download.opensuse.org/repositories/home:boombatower:snapshot/openSUSE_Tumbleweed/ tw-snapshot
 zypper in tumbleweed-cli
 ```
 
