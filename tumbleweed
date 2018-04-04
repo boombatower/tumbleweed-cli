@@ -63,6 +63,7 @@ tumbleweed_repo_init()
     sudo mkdir "$REPOS_DIR/.previous"
   fi
 
+  local IFS=$'\n' # Handle repo files with space in name. :(
   local files=($(grep -lP "$REPO_PATTERN" "$REPOS_DIR"/*))
   local file
   for file in ${files[@]} ; do
