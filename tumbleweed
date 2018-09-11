@@ -219,6 +219,66 @@ tumbleweed_migrate_check()
   fi
 }
 
+tumbleweed_migrate()
+{
+  if [ $MIGRATED -eq 1 ] ; then
+    echo "already migrated, exiting"
+    exit 1
+  fi
+
+  echo "A backup of repos to be migrated will be kept in $REPOS_DIR/.migrated"
+  echo "which may be restored by invoking the unmigrate command."
+  echo
+
+  echo "Be aware that the official hosting snapshot count differs from the"
+  echo "unofficial hosting that you are currently using."
+  echo
+
+  local count_pre=$(curl --silent "$URL_PRE_MIGRATE/list" | wc -l)
+  local count_post=$(curl --silent "$URL_POST_MIGRATE/list" | wc -l)
+  echo "- unofficial, $URL_PRE_MIGRATE: $count_pre snapshots"
+  echo "- official, $URL_POST_MIGRATE: $count_post snapshots"
+  echo
+
+  echo "Eventually the unofficial hosting will be phased out."
+  echo
+
+  tumbleweed_prompt "Do you wish to continue?"
+  tumbleweed_sudo
+  tumbleweed_repo_migrate
+}
+
+tumbleweed_repo_migrate()
+{
+  if [ ! -d "$REPOS_DIR/.migrated" ] ; then
+    sudo mkdir "$REPOS_DIR/.migrated"
+  fi
+
+  local IFS=$'\n' # Handle repo files with space in name. :(
+  local files=($(grep -l "\$snapshotVersion" "$REPOS_DIR"/*))
+  for file in ${files[@]} ; do
+    sudo cp "$file" "$REPOS_DIR/.migrated"
+    sudo sed -i -r 's|(baseurl=).*(\$snapshotVersion)/(.*)|\1'$URL_POST_MIGRATE'/\2/tumbleweed/\3|' "$file"
+    echo "migrated $file"
+  done
+}
+
+tumbleweed_unmigrate()
+{
+    if [ ! -d "$REPOS_DIR/.migrated" ] ; then
+    echo "nothing to unmigrate"
+    exit 1
+  fi
+
+  # Prompt for confirmation.
+  local repos=($(ls "$REPOS_DIR/.migrated"))
+  tumbleweed_prompt "unmigrate ${#repos[@]} repos?"
+
+  tumbleweed_sudo
+  sudo mv "$REPOS_DIR/.migrated"/* $REPOS_DIR/
+  sudo rm -r "$REPOS_DIR/.migrated"
+}
+
 tumbleweed_usage()
 {
   cat <<_EOF_
@@ -242,6 +302,8 @@ update|upgrade        Switch to and install the latest available snapshot.
 switch %version       Switch to a new snapshot (none for latest).
 revert                Revert to the previous snapshot or repo state.
 uninit                Revert back to a snapshotless repository setup.
+migrate               Migrate from boombatower hosting to download.opensuse.org.
+unmigrate             Revert migration to official hosting.
 _EOF_
 }
 
@@ -252,7 +314,7 @@ tumbleweed_handle()
     --force) force=1 ; ;;
     --install) install=1 ; ;;
     -h|--help) command="usage" ; ;;
-    history|init|installed|latest|list|revert|status|target|uninit|update)
+    history|init|installed|latest|list|revert|status|target|uninit|update|migrate|unmigrate)
       command="$1" ; ;;
     version)
       command="installed" ; ;;
