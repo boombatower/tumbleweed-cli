@@ -6,7 +6,7 @@ Command line interface for interacting with Tumbleweed snapshots.
 
 The latest stable version can be installed from the main OSS repository.
 
-```bash
+```
 zypper in tumbleweed-cli
 ```
 
@@ -14,13 +14,13 @@ zypper in tumbleweed-cli
 
 See `tumbleweed --help` for reference. To get started utilizing snapshots:
 
-```bash
+```
 tumbleweed init
 ```
 
 The repos can be verified by ensuring that the URLs contain a snapshot version.
 
-```bash
+```
 zypper lr -EUP
 ```
 
@@ -31,7 +31,7 @@ to their original state.
 
 Some common examples are as follows.
 
-```bash
+```
 # present latest, target, and installed snapshot versions
 tumbleweed status
 
@@ -53,7 +53,7 @@ tumbleweed history
 
 To operate more manually, the following is equivalent to `tumbleweed update`.
 
-```bash
+```
 # switch to latest
 tumbleweed switch
 
