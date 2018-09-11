@@ -193,12 +193,7 @@ tumbleweed_uninit()
 
   # Prompt for confirmation.
   local repos=($(ls "$REPOS_DIR/.previous"))
-  echo -n "revert ${#repos[@]} repos? [y/n] (y): "
-  read response
-  if [ "$response" != "" ] && [ "$response" != "y" ] ; then
-    echo "exiting"
-    exit 1
-  fi
+  tumbleweed_prompt "revert ${#repos[@]} repos?"
 
   tumbleweed_sudo
   sudo mv "$REPOS_DIR/.previous"/* $REPOS_DIR/
