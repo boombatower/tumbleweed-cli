@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 VERSION="development"
-URL="http://download.tumbleweed.boombatower.com"
+URL_PRE_MIGRATE="http://download.tumbleweed.boombatower.com"
+URL_POST_MIGRATE="http://download.opensuse.org/history"
 CONFIG_DIR="/etc/zypp"
 VARS_DIR="$CONFIG_DIR/vars.d"
 VAR_NAME="snapshotVersion"
@@ -70,7 +71,7 @@ tumbleweed_repo_init()
     echo "backup $file"
     sudo cp --backup=numbered "$file" "$REPOS_DIR/.previous/$(basename "$file")"
     sudo sed -i -r 's|(name=.*)|\1 ($snapshotVersion)|' "$file"
-    sudo sed -i -r 's|(baseurl=).*tumbleweed/(.*)|\1'$URL'/$snapshotVersion/\2|' "$file"
+    sudo sed -i -r 's|(baseurl=).*tumbleweed/(.*)|\1'$URL'/$snapshotVersion/tumbleweed/\2|' "$file"
   done
 }
 
@@ -207,6 +208,17 @@ tumbleweed_install()
   sudo zypper dup
 }
 
+tumbleweed_migrate_check()
+{
+  if grep -l "$URL_PRE_MIGRATE" "$REPOS_DIR"/* > /dev/null ; then
+    MIGRATED=0
+    URL="$URL_PRE_MIGRATE"
+  else
+    MIGRATED=1
+    URL="$URL_POST_MIGRATE"
+  fi
+}
+
 tumbleweed_usage()
 {
   cat <<_EOF_
@@ -274,6 +286,7 @@ if [ "$command" != "usage" ] && [ "$command" != "init" ] && ! tumbleweed_inited 
   exit 1
 fi
 
+tumbleweed_migrate_check
 tumbleweed_$command ${args[@]}
 
 if [ "$install" == "1" ] ; then
