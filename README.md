@@ -63,3 +63,7 @@ zypper dup
 
 The repo URLs are effectively the only part of the `libzypp` configuration that
 is being changed. This keeps the workflow changes to a minimum.
+
+## Review
+
+For information, feedback, and predictive scoring of Tumbleweed snapshots to aid in choosing which snapshot to pick visit http://review.tumbleweed.boombatower.com/ which is produced by [boombatower/tumbleweed-review](https://github.com/boombatower/tumbleweed-review).
