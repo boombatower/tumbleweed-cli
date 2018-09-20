@@ -8,7 +8,8 @@ _tumbleweed_completion()
       "${COMP_WORDS[1]}" == "init" ||
       "${COMP_WORDS[1]}" == "switch" ||
       "${COMP_WORDS[1]}" == "update" ||
-      "${COMP_WORDS[1]}" == "upgrade" ) ]] ; then
+      "${COMP_WORDS[1]}" == "upgrade" ||
+      "${COMP_WORDS[1]}" == "revert" ) ]] ; then
 
     local flags=("--force" "--install")
     for word in ${COMP_WORDS[@]:2} ; do
