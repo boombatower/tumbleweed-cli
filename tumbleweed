@@ -217,6 +217,14 @@ tumbleweed_migrate_check()
     MIGRATED=1
     URL="$URL_POST_MIGRATE"
   fi
+
+  # Issue notice of official hosting and migration if target is available.
+  if [ $MIGRATED -eq 0 ] && \
+    curl --silent "$URL_POST_MIGRATE/list" | grep -Fx "$(tumbleweed_target)" > /dev/null ; then
+    echo "NOTICE: Official snapshot hosting is now available. The unofficial hosting is" >&2
+    echo "        deprecated and will be discontinued at a future date. Consider" >&2
+    echo "        migrating to the official hosting via \`tumbleweed migrate\`." >&2
+  fi
 }
 
 tumbleweed_migrate()
