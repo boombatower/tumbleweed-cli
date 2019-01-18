@@ -158,6 +158,10 @@ tumbleweed_switch()
     fi
   else
     local version="$(tumbleweed_latest)"
+    if [ -z "$version" ] ; then
+      echo "Unable to determine latest version (likely due to network connection issue)"
+      exit 1
+    fi
     echo "choosing latest version"
   fi
 
