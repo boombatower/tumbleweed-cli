@@ -161,6 +161,11 @@ tumbleweed_switch()
     echo "choosing latest version"
   fi
 
+  if [ -z "$version" ] ; then
+    echo "There is no version to upgrade to. Please check your internet connection"
+    exit
+  fi
+
   if [ "$version" == "$(tumbleweed_target)" ] && [ "$force" != "1" ] ; then
     echo "already on $version"
     exit
