@@ -273,7 +273,7 @@ tumbleweed_repo_migrate()
 
 tumbleweed_unmigrate()
 {
-    if [ ! -d "$REPOS_DIR/.migrated" ] ; then
+  if [ ! -d "$REPOS_DIR/.migrated" ] ; then
     echo "nothing to unmigrate"
     exit 1
   fi
