@@ -9,9 +9,9 @@ VAR_NAME="snapshotVersion"
 VAR_FILE="$VARS_DIR/$VAR_NAME"
 SNAPSHOT_HISTORY="$VARS_DIR/.snapshotVersion.history"
 REPOS_DIR="/etc/zypp/repos.d"
-# REPO_PATTERN="http://download.opensuse.org/(?:[^u][^/]+/)?tumbleweed/[^$]+"
+# REPO_PATTERN="https?://download.opensuse.org/(?:[^u][^/]+/)?tumbleweed/[^$]+"
 # Disable matching debug and source URLs for the time being.
-REPO_PATTERN="http://download.opensuse.org/tumbleweed/[^$]+"
+REPO_PATTERN="https?://download.opensuse.org/tumbleweed/[^$]+"
 
 tumbleweed_sudo()
 {
