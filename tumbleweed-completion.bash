@@ -3,7 +3,7 @@
 _tumbleweed_completion()
 {
   if [ ${#COMP_WORDS[@]} -eq 2 ] ; then
-    COMPREPLY=($(compgen -W "history init installed latest list migrate revert status switch target uninit unmigrate update upgrade version --version --help" -- "${COMP_WORDS[-1]}"))
+    COMPREPLY=($(compgen -W "history init installed latest list migrate revert status switch target uninit unmigrate update upgrade reviews version --version --help" -- "${COMP_WORDS[-1]}"))
   elif [[ ${#COMP_WORDS[@]} -gt 2 && (
       "${COMP_WORDS[1]}" == "init" ||
       "${COMP_WORDS[1]}" == "switch" ||
