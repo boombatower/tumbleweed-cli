@@ -3,6 +3,7 @@
 VERSION="development"
 URL_PRE_MIGRATE="http://download.tumbleweed.boombatower.com"
 URL_POST_MIGRATE="http://download.opensuse.org/history"
+URL_REVIEWS="https://review.tumbleweed.boombatower.com/data"
 CONFIG_DIR="/etc/zypp"
 VARS_DIR="$CONFIG_DIR/vars.d"
 VAR_NAME="snapshotVersion"
@@ -291,6 +292,22 @@ tumbleweed_unmigrate()
   sudo rm -r "$REPOS_DIR/.migrated"
 }
 
+tumbleweed_reviews()
+{
+  local reviews_yml_all=$(curl -s "$URL_REVIEWS/score.yaml")
+  local reviews_yml=$(echo "$reviews_yml_all" | tail -n 300)
+  local releases=$(echo "$reviews_yml" | grep -E "^'([0-9]{8})':$" | grep -oE "[0-9]{8}" | sort -r)
+
+  echo "Release  | Rating | Stability"
+  echo "-----------------------------"
+  for r in $releases; do
+    local data=$(echo "$reviews_yml" | grep -A2 "$r")
+    local score=$(echo "$data" | awk 'NR==2' | cut -d':' -f2)
+    local stability=$(echo "$data" | awk 'NR==3' | cut -d':' -f2)
+    echo "$r |   $score  | $stability"
+  done
+}
+
 tumbleweed_usage()
 {
   cat <<_EOF_
@@ -316,6 +333,7 @@ revert                Revert to the previous snapshot or repo state.
 uninit                Revert back to a snapshotless repository setup.
 migrate               Migrate from boombatower hosting to download.opensuse.org.
 unmigrate             Revert migration to official hosting.
+reviews               Show release reviews and ratings
 _EOF_
 }
 
@@ -326,7 +344,7 @@ tumbleweed_handle()
     --force) force=1 ; ;;
     --install) install=1 ; ;;
     -h|--help) command="usage" ; ;;
-    history|init|installed|latest|list|revert|status|target|uninit|update|migrate|unmigrate)
+    history|init|installed|latest|list|revert|status|target|uninit|update|migrate|unmigrate|reviews)
       command="$1" ; ;;
     version)
       command="installed" ; ;;
