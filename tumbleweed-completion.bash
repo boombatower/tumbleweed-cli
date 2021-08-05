@@ -11,7 +11,7 @@ _tumbleweed_completion()
       "${COMP_WORDS[1]}" == "upgrade" ||
       "${COMP_WORDS[1]}" == "revert" ) ]] ; then
 
-    local flags=("--force" "--install")
+    local flags=("--force" "--install" "--no-allow-vendor-change")
     for word in ${COMP_WORDS[@]:2} ; do
       for i in ${!flags[@]} ; do
         if [ "${flags[$i]}" == "$word" ] ; then
