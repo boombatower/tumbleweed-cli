@@ -209,7 +209,12 @@ tumbleweed_uninit()
 tumbleweed_install()
 {
   sudo zypper ref
-  sudo zypper dup
+
+  if [ "$no_allow_vendor_change" == "1" ] ; then
+    sudo zypper dup --no-allow-vendor-change
+  else
+    sudo zypper dup
+  fi
 }
 
 tumbleweed_migrate_check()
@@ -300,6 +305,8 @@ Options:
     --version         Print version string and exit
     --force           Force on operation to occur regardless of checks.
     --install         Initiate install after command.
+    --no-allow-vendor-change
+                      Prevent allowing vendor change for upgrades.
 -h, --help            Display this message and exit
 
 Commands:
@@ -325,6 +332,7 @@ tumbleweed_handle()
     --version) echo "$VERSION" ; exit 0 ; ;;
     --force) force=1 ; ;;
     --install) install=1 ; ;;
+    --no-allow-vendor-change) no_allow_vendor_change=1 ; ;;
     -h|--help) command="usage" ; ;;
     history|init|installed|latest|list|revert|status|target|uninit|update|migrate|unmigrate)
       command="$1" ; ;;
